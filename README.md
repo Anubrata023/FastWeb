@@ -564,6 +564,14 @@ Built with ❤️ using:
 - [Google Favicon API](https://www.google.com/s2/favicons) — Link previews
 - Inspiration: Anime study culture, JEE/NEET student workflows, Notion-style dashboards
 
+
+## Team Members
+-Anubrata Paul
+-Sakshi Sharma
+-Kislay Kumar
+-Aman Sagar
+
+
 ---
 
 *"Like Naruto becoming Hokage through relentless training — you too shall conquer through unwavering consistency."*
