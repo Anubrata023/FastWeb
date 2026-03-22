@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyVerse — Community & Doubts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --cream:#f5f5f5;--red:#f05454;--steel:#30475e;--ink:#121212;
+  --sidebar-w:240px;--nav-h:60px;
+  --red-dim:rgba(240,84,84,0.12);--steel-dim:rgba(48,71,94,0.15);
+  --red-glow:rgba(240,84,84,0.25);
+  --glass:rgba(48,71,94,0.08);--glass-b:rgba(48,71,94,0.24);
+  --text-dim:rgba(245,245,245,0.4);--text-muted:rgba(245,245,245,0.22);
+}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--cream);min-height:100vh;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--ink);}
+::-webkit-scrollbar-thumb{background:var(--steel);border-radius:10px;}
+::selection{background:rgba(240,84,84,0.3);color:var(--cream);}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(18,18,18,0.94);backdrop-filter:blur(18px);border-bottom:1px solid rgba(240,84,84,0.15);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:1000;}
+.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--cream);letter-spacing:-0.02em;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.nav-crumbs{display:flex;align-items:center;gap:6px;}
+.nc{font-family:'DM Mono',monospace;font-size:0.76rem;color:var(--text-dim);}
+.nc-sep{color:rgba(245,245,245,0.15);font-size:0.72rem;}
+.nc-act{font-family:'DM Mono',monospace;font-size:0.76rem;color:var(--red);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.online-pill{display:flex;align-items:center;gap:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:20px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:0.7rem;color:#4ade80;}
+.online-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:blink 1.5s ease infinite;}
+.profile-pill{display:flex;align-items:center;gap:10px;background:rgba(48,71,94,0.3);border:1px solid rgba(48,71,94,0.5);border-radius:40px;padding:6px 14px 6px 8px;cursor:pointer;transition:all 0.25s;position:relative;}
+.profile-pill:hover{background:rgba(48,71,94,0.5);border-color:var(--red);}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--steel));display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;color:white;flex-shrink:0;}
+.pname{font-size:0.83rem;font-weight:600;}
+.psub{font-size:0.66rem;color:var(--text-dim);font-family:'DM Mono',monospace;}
+
+/* ── SIDEBAR TOGGLE BUTTON ── */
+.sb-toggle{
+  display:flex;align-items:center;justify-content:center;
+  width:38px;height:38px;border-radius:10px;
+  background:rgba(48,71,94,0.25);
+  border:1px solid rgba(48,71,94,0.45);
+  cursor:pointer;transition:all 0.22s;flex-shrink:0;
+  position:relative;
+}
+.sb-toggle:hover{background:rgba(240,84,84,0.15);border-color:rgba(240,84,84,0.4);}
+.sb-toggle.open{background:rgba(240,84,84,0.15);border-color:rgba(240,84,84,0.4);}
+.sb-toggle-icon{display:flex;flex-direction:column;gap:4px;width:16px;}
+.sb-toggle-icon span{display:block;height:2px;background:var(--cream);border-radius:2px;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);transform-origin:center;}
+.sb-toggle.open .sb-toggle-icon span:nth-child(1){transform:translateY(6px) rotate(45deg);}
+.sb-toggle.open .sb-toggle-icon span:nth-child(2){transform:scaleX(0);opacity:0;}
+.sb-toggle.open .sb-toggle-icon span:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
+
+/* Notification dot on toggle when sidebar is closed */
+.sb-toggle-notif{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--ink);animation:blink 2s ease infinite;}
+.sb-toggle.open .sb-toggle-notif{display:none;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  position:fixed;top:var(--nav-h);left:0;bottom:0;
+  width:var(--sidebar-w);
+  background:rgba(14,14,14,0.98);
+  backdrop-filter:blur(24px);
+  border-right:1px solid var(--glass-b);
+  display:flex;flex-direction:column;
+  padding:20px 0;z-index:900;overflow-y:auto;
+  /* HIDDEN by default — slides in from left */
+  transform:translateX(-100%);
+  transition:transform 0.38s cubic-bezier(0.4,0,0.2,1),
+             box-shadow 0.38s ease;
+  box-shadow:none;
+}
+.sidebar.open{
+  transform:translateX(0);
+  box-shadow:6px 0 40px rgba(0,0,0,0.55),2px 0 0 rgba(240,84,84,0.08);
+}
+
+/* Backdrop overlay when sidebar is open */
+.sb-backdrop{
+  position:fixed;inset:0;top:var(--nav-h);z-index:899;
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;
+  transition:opacity 0.35s ease;
+}
+.sb-backdrop.visible{opacity:1;pointer-events:all;}
+
+/* Sidebar header — close button row */
+.sb-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px 14px;
+  border-bottom:1px solid rgba(48,71,94,0.18);
+  margin-bottom:8px;
+}
+.sb-header-logo{
+  font-family:'Playfair Display',serif;font-size:1rem;font-weight:900;
+  color:var(--cream);letter-spacing:-0.01em;display:flex;align-items:center;gap:6px;
+}
+.sb-header-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 2s ease infinite;}
+.sb-close{
+  width:28px;height:28px;border-radius:8px;
+  background:rgba(240,84,84,0.08);border:1px solid rgba(240,84,84,0.2);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text-dim);font-size:0.85rem;
+  transition:all 0.2s;
+}
+.sb-close:hover{background:rgba(240,84,84,0.2);border-color:var(--red);color:var(--cream);}
+
+.sb-label{font-size:0.6rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);padding:0 18px 8px;font-family:'DM Mono',monospace;}
+.sb-item{display:flex;align-items:center;gap:11px;padding:10px 18px;cursor:pointer;font-size:0.84rem;font-weight:500;color:var(--text-dim);border-left:2px solid transparent;transition:all 0.2s;}
+.sb-item:hover{color:var(--cream);background:rgba(240,84,84,0.06);border-left-color:rgba(240,84,84,0.3);}
+.sb-item.active{color:var(--cream);background:rgba(240,84,84,0.1);border-left-color:var(--red);}
+.sb-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0;}
+.sb-badge{margin-left:auto;background:var(--red);color:white;font-size:0.6rem;font-weight:700;padding:2px 6px;border-radius:20px;font-family:'DM Mono',monospace;}
+.sb-badge-green{margin-left:auto;background:#4ade80;color:#0a1a0a;font-size:0.6rem;font-weight:700;padding:2px 6px;border-radius:20px;font-family:'DM Mono',monospace;}
+.sb-divider{height:1px;background:rgba(48,71,94,0.2);margin:8px 18px;}
+
+/* Online members in sidebar */
+.sb-members{padding:14px 18px;margin-top:auto;}
+.sb-members-title{font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);font-family:'DM Mono',monospace;margin-bottom:10px;}
+.member-row{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;transition:opacity 0.2s;}
+.member-row:hover{opacity:0.8;}
+.member-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;position:relative;}
+.member-av::after{content:'';position:absolute;bottom:0;right:0;width:7px;height:7px;border-radius:50%;background:#4ade80;border:1.5px solid var(--ink);}
+.member-av.away::after{background:#f59e0b;}
+.member-av.busy::after{background:var(--red);}
+.member-name{font-size:0.78rem;color:rgba(245,245,245,0.55);}
+.member-status{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text-muted);margin-left:auto;}
+
+/* ── MAIN — full width since sidebar is hidden ── */
+.main{
+  margin-top:var(--nav-h);
+  margin-left:0;           /* no offset — sidebar is off-screen */
+  min-height:calc(100vh - var(--nav-h));
+  transition:margin-left 0.38s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── PAGE HERO ── */
+.page-hero{padding:40px 52px 32px;position:relative;overflow:hidden;border-bottom:1px solid var(--glass-b);background:linear-gradient(135deg,rgba(48,71,94,0.18) 0%,rgba(18,18,18,0.7) 60%,rgba(240,84,84,0.05) 100%);}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 80% at 80% 50%,rgba(240,84,84,0.05) 0%,transparent 70%);}
+.hero-row{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;position:relative;z-index:1;flex-wrap:wrap;}
+.hero-left{}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:7px;background:rgba(240,84,84,0.1);border:1px solid rgba(240,84,84,0.22);border-radius:40px;padding:4px 13px;font-size:0.68rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--red);font-family:'DM Mono',monospace;margin-bottom:12px;}
+.hero-ed{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1.5s ease infinite;}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,3.5vw,2.8rem);font-weight:900;line-height:1.1;margin-bottom:8px;}
+.page-title em{font-style:italic;color:var(--red);}
+.page-sub{font-size:0.88rem;color:var(--text-dim);font-weight:300;line-height:1.65;max-width:520px;}
+.hero-stats{display:flex;gap:20px;flex-wrap:wrap;}
+.hs{text-align:center;background:var(--glass);border:1px solid var(--glass-b);border-radius:14px;padding:14px 20px;}
+.hs-v{font-family:'DM Mono',monospace;font-size:1.5rem;font-weight:500;color:var(--cream);line-height:1;}
+.hs-v span{font-size:0.8rem;color:var(--red);}
+.hs-l{font-size:0.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:3px;}
+
+/* ── TAB BAR ── */
+.tab-bar{display:flex;align-items:center;gap:0;padding:0 52px;border-bottom:1px solid var(--glass-b);background:rgba(18,18,18,0.5);backdrop-filter:blur(10px);position:sticky;top:var(--nav-h);z-index:50;}
+.tab-item{display:flex;align-items:center;gap:7px;padding:14px 20px;font-size:0.84rem;font-weight:600;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.22s;white-space:nowrap;}
+.tab-item:hover{color:var(--cream);}
+.tab-item.active{color:var(--cream);border-bottom-color:var(--red);}
+.tab-count{font-family:'DM Mono',monospace;font-size:0.65rem;background:rgba(240,84,84,0.15);color:var(--red);padding:1px 6px;border-radius:10px;font-weight:700;}
+
+/* ── CONTENT WRAPPER ── */
+.content{padding:32px 52px;display:grid;grid-template-columns:1fr 340px;gap:24px;}
+@media(max-width:1100px){.content{grid-template-columns:1fr;}}
+.feed{min-width:0;}
+.sidebar-right{display:flex;flex-direction:column;gap:16px;}
+
+/* ── PANEL ── */
+.panel{background:var(--glass);border:1px solid var(--glass-b);border-radius:18px;padding:22px;}
+.panel-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--cream);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.panel-title::before{content:'';width:3px;height:15px;background:var(--red);border-radius:2px;display:block;flex-shrink:0;}
+
+/* ── POST COMPOSER ── */
+.composer{background:rgba(48,71,94,0.1);border:1px solid rgba(240,84,84,0.18);border-radius:16px;padding:18px;margin-bottom:20px;}
+.composer-top{display:flex;align-items:flex-start;gap:12px;}
+.comp-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--steel));display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;flex-shrink:0;}
+.comp-box{flex:1;}
+.comp-input{width:100%;background:rgba(18,18,18,0.7);border:1px solid rgba(48,71,94,0.38);border-radius:12px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.88rem;padding:11px 14px;outline:none;resize:none;min-height:52px;transition:border-color 0.25s,min-height 0.3s;line-height:1.5;}
+.comp-input::placeholder{color:var(--text-muted);}
+.comp-input:focus{border-color:var(--red);min-height:100px;}
+.comp-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap;gap:8px;}
+.comp-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.comp-tag{font-family:'DM Mono',monospace;font-size:0.68rem;padding:3px 10px;border-radius:20px;border:1px solid rgba(48,71,94,0.38);background:rgba(48,71,94,0.15);color:var(--text-dim);cursor:pointer;transition:all 0.15s;}
+.comp-tag:hover,.comp-tag.sel{background:rgba(240,84,84,0.12);border-color:rgba(240,84,84,0.32);color:var(--red);}
+.comp-actions{display:flex;align-items:center;gap:8px;}
+.comp-tool{background:none;border:none;color:var(--text-dim);font-size:1rem;cursor:pointer;padding:4px 6px;border-radius:6px;transition:all 0.15s;}
+.comp-tool:hover{background:rgba(240,84,84,0.1);color:var(--red);}
+.post-btn{background:var(--red);border:none;border-radius:10px;color:white;font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.82rem;padding:8px 20px;cursor:pointer;transition:all 0.22s;box-shadow:0 4px 16px rgba(240,84,84,0.25);}
+.post-btn:hover{background:#d94444;transform:translateY(-1px);}
+
+/* ── FEED FILTERS ── */
+.feed-filters{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.ff{font-family:'DM Mono',monospace;font-size:0.7rem;padding:5px 12px;border-radius:20px;border:1px solid rgba(245,245,245,0.1);background:rgba(245,245,245,0.04);color:var(--text-dim);cursor:pointer;transition:all 0.18s;letter-spacing:0.04em;}
+.ff:hover,.ff.act{background:rgba(240,84,84,0.12);border-color:rgba(240,84,84,0.3);color:var(--red);}
+.ff-divider{width:1px;height:16px;background:rgba(48,71,94,0.35);}
+
+/* ── DISCUSSION POST ── */
+.post{background:rgba(48,71,94,0.06);border:1px solid var(--glass-b);border-radius:16px;padding:18px;margin-bottom:12px;cursor:pointer;transition:all 0.25s;animation:fadeUp 0.5s ease both;position:relative;}
+.post:hover{border-color:rgba(240,84,84,0.25);background:rgba(48,71,94,0.12);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.25);}
+.post.pinned{border-color:rgba(240,84,84,0.3);background:rgba(240,84,84,0.04);}
+.post.pinned::before{content:'📌 PINNED';position:absolute;top:12px;right:14px;font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--red);letter-spacing:0.1em;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.post-header{display:flex;align-items:flex-start;gap:11px;margin-bottom:12px;}
+.post-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;flex-shrink:0;background:linear-gradient(135deg,var(--steel),var(--red));}
+.post-meta{flex:1;}
+.post-author{font-size:0.86rem;font-weight:700;color:var(--cream);display:flex;align-items:center;gap:6px;}
+.post-rank{font-family:'DM Mono',monospace;font-size:0.6rem;padding:1px 6px;border-radius:10px;}
+.rank-topper{background:rgba(253,224,71,0.12);color:#fde047;border:1px solid rgba(253,224,71,0.25);}
+.rank-expert{background:rgba(240,84,84,0.12);color:var(--red);border:1px solid rgba(240,84,84,0.25);}
+.rank-helper{background:rgba(74,222,128,0.1);color:#4ade80;border:1px solid rgba(74,222,128,0.25);}
+.rank-member{background:rgba(48,71,94,0.3);color:var(--text-dim);border:1px solid var(--glass-b);}
+.post-time{font-family:'DM Mono',monospace;font-size:0.66rem;color:var(--text-muted);margin-top:1px;}
+.post-category{font-family:'DM Mono',monospace;font-size:0.62rem;padding:2px 8px;border-radius:10px;margin-left:auto;flex-shrink:0;}
+.cat-strategy{background:rgba(147,197,253,0.1);color:#93c5fd;border:1px solid rgba(147,197,253,0.22);}
+.cat-motivation{background:rgba(253,224,71,0.08);color:#fde047;border:1px solid rgba(253,224,71,0.2);}
+.cat-timetable{background:rgba(74,222,128,0.08);color:#4ade80;border:1px solid rgba(74,222,128,0.2);}
+.cat-resource{background:rgba(240,84,84,0.1);color:var(--red);border:1px solid rgba(240,84,84,0.22);}
+.cat-general{background:rgba(48,71,94,0.3);color:var(--text-dim);border:1px solid var(--glass-b);}
+.cat-jee{background:rgba(192,132,252,0.1);color:#c084fc;border:1px solid rgba(192,132,252,0.22);}
+.cat-neet{background:rgba(45,212,191,0.1);color:#2dd4bf;border:1px solid rgba(45,212,191,0.22);}
+.post-body{font-size:0.87rem;color:rgba(245,245,245,0.72);line-height:1.72;margin-bottom:13px;}
+.post-body strong{color:var(--cream);font-weight:600;}
+.post-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
+.ptag{font-family:'DM Mono',monospace;font-size:0.64rem;color:var(--text-muted);background:rgba(48,71,94,0.2);padding:2px 7px;border-radius:5px;}
+.post-footer{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.post-action{display:flex;align-items:center;gap:5px;font-size:0.77rem;color:var(--text-dim);cursor:pointer;padding:4px 8px;border-radius:8px;border:1px solid transparent;transition:all 0.18s;}
+.post-action:hover{background:rgba(240,84,84,0.08);border-color:rgba(240,84,84,0.2);color:var(--cream);}
+.post-action.liked{color:var(--red);}
+.post-action.saved{color:#fde047;}
+.pa-sep{flex:1;}
+.post-views{font-family:'DM Mono',monospace;font-size:0.66rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;}
+
+/* ── DOUBT CARD ── */
+.doubt-card{background:rgba(48,71,94,0.06);border:1px solid var(--glass-b);border-radius:16px;padding:18px;margin-bottom:12px;animation:fadeUp 0.5s ease both;transition:all 0.25s;}
+.doubt-card:hover{border-color:rgba(240,84,84,0.22);box-shadow:0 6px 25px rgba(0,0,0,0.2);}
+.doubt-card.solved{border-color:rgba(74,222,128,0.25);background:rgba(74,222,128,0.03);}
+.doubt-card.urgent-d{border-left:3px solid var(--red);}
+.dc-top{display:flex;align-items:flex-start;gap:11px;margin-bottom:10px;}
+.dc-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:700;flex-shrink:0;}
+.dc-meta{flex:1;}
+.dc-author-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:2px;}
+.dc-author{font-size:0.84rem;font-weight:700;color:var(--cream);}
+.dc-time{font-family:'DM Mono',monospace;font-size:0.64rem;color:var(--text-muted);}
+.dc-subj{font-family:'DM Mono',monospace;font-size:0.62rem;padding:2px 7px;border-radius:8px;}
+.subj-phy{background:rgba(147,197,253,0.1);color:#93c5fd;border:1px solid rgba(147,197,253,0.2);}
+.subj-chem{background:rgba(74,222,128,0.08);color:#4ade80;border:1px solid rgba(74,222,128,0.2);}
+.subj-math{background:rgba(240,84,84,0.1);color:var(--red);border:1px solid rgba(240,84,84,0.2);}
+.subj-bio{background:rgba(45,212,191,0.08);color:#2dd4bf;border:1px solid rgba(45,212,191,0.2);}
+.subj-cs{background:rgba(192,132,252,0.1);color:#c084fc;border:1px solid rgba(192,132,252,0.2);}
+.solved-badge{margin-left:auto;font-family:'DM Mono',monospace;font-size:0.62rem;padding:2px 8px;border-radius:10px;background:rgba(74,222,128,0.12);color:#4ade80;border:1px solid rgba(74,222,128,0.25);flex-shrink:0;}
+.dc-q{font-size:0.88rem;font-weight:600;color:var(--cream);margin-bottom:5px;line-height:1.45;}
+.dc-desc{font-size:0.82rem;color:rgba(245,245,245,0.58);line-height:1.65;margin-bottom:10px;}
+.dc-img{width:100%;max-width:340px;border-radius:10px;border:1px solid var(--glass-b);margin-bottom:10px;display:block;}
+.dc-footer{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.dc-action{display:flex;align-items:center;gap:4px;font-size:0.76rem;color:var(--text-dim);cursor:pointer;padding:4px 8px;border-radius:8px;border:1px solid transparent;transition:all 0.18s;}
+.dc-action:hover{background:rgba(240,84,84,0.08);border-color:rgba(240,84,84,0.18);color:var(--cream);}
+.dc-action.answered{color:#4ade80;}
+.dc-sep{flex:1;}
+.dc-replies{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--text-muted);}
+
+/* ── ANSWER THREAD ── */
+.answer-thread{margin-top:12px;border-top:1px solid rgba(48,71,94,0.2);padding-top:12px;display:none;}
+.answer-thread.open{display:block;}
+.answer-item{display:flex;gap:10px;margin-bottom:10px;padding:10px 12px;border-radius:10px;background:rgba(48,71,94,0.08);border:1px solid rgba(48,71,94,0.18);transition:all 0.2s;}
+.answer-item:hover{border-color:rgba(240,84,84,0.18);}
+.answer-item.best{border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.04);}
+.ans-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;}
+.ans-body{flex:1;}
+.ans-meta{display:flex;align-items:center;gap:7px;margin-bottom:4px;flex-wrap:wrap;}
+.ans-author{font-size:0.8rem;font-weight:700;color:var(--cream);}
+.ans-time{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text-muted);}
+.best-tag{font-family:'DM Mono',monospace;font-size:0.6rem;background:rgba(74,222,128,0.12);color:#4ade80;padding:1px 6px;border-radius:8px;border:1px solid rgba(74,222,128,0.25);}
+.ans-text{font-size:0.82rem;color:rgba(245,245,245,0.65);line-height:1.65;}
+.ans-actions{display:flex;gap:8px;margin-top:6px;}
+.ans-btn{font-size:0.72rem;color:var(--text-muted);cursor:pointer;padding:2px 6px;border-radius:5px;transition:all 0.15s;display:flex;align-items:center;gap:3px;}
+.ans-btn:hover{background:rgba(240,84,84,0.08);color:var(--cream);}
+.ans-btn.upvoted{color:var(--red);}
+.reply-input-wrap{display:flex;gap:8px;margin-top:8px;}
+.reply-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--steel));display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;}
+.reply-input{flex:1;background:rgba(18,18,18,0.7);border:1px solid rgba(48,71,94,0.35);border-radius:9px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.81rem;padding:7px 11px;outline:none;transition:border-color 0.25s;}
+.reply-input::placeholder{color:var(--text-muted);}
+.reply-input:focus{border-color:var(--red);}
+.reply-send{background:var(--steel);border:none;border-radius:9px;color:var(--cream);font-size:0.9rem;width:34px;height:34px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.reply-send:hover{background:var(--red);}
+
+/* ── DOUBT COMPOSER ── */
+.doubt-composer{background:rgba(48,71,94,0.08);border:1px solid rgba(240,84,84,0.16);border-radius:16px;padding:18px;margin-bottom:20px;}
+.dc-form{display:flex;flex-direction:column;gap:10px;}
+.dc-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.finp{background:rgba(18,18,18,0.8);border:1px solid rgba(48,71,94,0.38);border-radius:10px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.84rem;padding:9px 13px;outline:none;transition:border-color 0.25s;width:100%;}
+.finp::placeholder{color:var(--text-muted);}
+.finp:focus{border-color:var(--red);}
+.ftextarea{resize:none;min-height:80px;line-height:1.55;}
+.fsel{background:rgba(18,18,18,0.95);}
+.fsel option{background:#1e2f3e;}
+.dc-form-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.upload-hint{font-size:0.74rem;color:var(--text-muted);display:flex;align-items:center;gap:5px;}
+.submit-doubt{background:var(--red);border:none;border-radius:10px;color:white;font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.84rem;padding:9px 22px;cursor:pointer;transition:all 0.22s;box-shadow:0 4px 16px rgba(240,84,84,0.25);}
+.submit-doubt:hover{background:#d94444;transform:translateY(-1px);}
+
+/* ── RIGHT SIDEBAR WIDGETS ── */
+.widget{background:var(--glass);border:1px solid var(--glass-b);border-radius:16px;padding:18px;}
+.widget-title{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.widget-title::before{content:'';width:3px;height:10px;background:var(--red);border-radius:2px;display:block;}
+
+/* Leaderboard */
+.lb-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(48,71,94,0.15);transition:all 0.15s;cursor:pointer;}
+.lb-row:last-child{border-bottom:none;}
+.lb-row:hover{transform:translateX(3px);}
+.lb-rank{font-family:'DM Mono',monospace;font-size:0.72rem;font-weight:700;width:20px;color:var(--text-muted);}
+.lb-rank.gold{color:#fde047;}
+.lb-rank.silver{color:#d1d5db;}
+.lb-rank.bronze{color:#f59e0b;}
+.lb-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;}
+.lb-name{flex:1;font-size:0.82rem;font-weight:500;color:rgba(245,245,245,0.72);}
+.lb-pts{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--red);font-weight:500;}
+
+/* Trending topics */
+.trend-item{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid rgba(48,71,94,0.12);cursor:pointer;transition:all 0.15s;}
+.trend-item:last-child{border-bottom:none;}
+.trend-item:hover{transform:translateX(3px);}
+.trend-num{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--text-muted);width:16px;}
+.trend-tag{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--red);font-weight:500;}
+.trend-count{font-family:'DM Mono',monospace;font-size:0.64rem;color:var(--text-muted);margin-left:auto;}
+
+/* Active rooms */
+.room-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(48,71,94,0.12);cursor:pointer;transition:all 0.18s;}
+.room-item:last-child{border-bottom:none;}
+.room-item:hover{transform:translateX(3px);}
+.room-icon{width:34px;height:34px;border-radius:10px;background:rgba(48,71,94,0.25);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;border:1px solid rgba(48,71,94,0.4);}
+.room-info{flex:1;min-width:0;}
+.room-name{font-size:0.82rem;font-weight:600;color:var(--cream);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.room-meta{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text-muted);}
+.room-join{background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.25);border-radius:8px;color:#4ade80;font-family:'DM Mono',monospace;font-size:0.62rem;padding:3px 8px;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.room-join:hover{background:rgba(74,222,128,0.2);}
+
+/* Polls */
+.poll-q{font-size:0.86rem;font-weight:600;color:var(--cream);margin-bottom:12px;line-height:1.45;}
+.poll-opt{margin-bottom:8px;cursor:pointer;}
+.poll-opt-label{display:flex;justify-content:space-between;font-size:0.78rem;color:rgba(245,245,245,0.65);margin-bottom:4px;}
+.poll-bar-wrap{height:6px;background:rgba(245,245,245,0.06);border-radius:6px;overflow:hidden;}
+.poll-bar-fill{height:100%;border-radius:6px;transition:width 0.6s cubic-bezier(0.2,0.8,0.2,1);}
+.poll-vote-btn{width:100%;margin-top:10px;padding:7px;background:rgba(240,84,84,0.08);border:1px dashed rgba(240,84,84,0.25);border-radius:9px;color:var(--text-dim);font-family:'DM Mono',monospace;font-size:0.7rem;cursor:pointer;transition:all 0.2s;letter-spacing:0.08em;}
+.poll-vote-btn:hover{border-color:var(--red);color:var(--cream);background:rgba(240,84,84,0.12);}
+
+/* ── RULES MODAL ── */
+.overlay{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.88);backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all 0.3s;}
+.overlay.open{opacity:1;visibility:visible;}
+.modal{background:rgba(18,18,18,0.99);border:1px solid rgba(48,71,94,0.4);border-radius:24px;padding:36px;max-width:520px;width:92%;max-height:85vh;overflow-y:auto;transform:scale(0.92) translateY(16px);transition:all 0.3s;}
+.overlay.open .modal{transform:scale(1) translateY(0);}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--cream);}
+.modal-x{background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:4px;transition:color 0.2s;}
+.modal-x:hover{color:var(--cream);}
+.modal-sub{font-size:0.84rem;color:var(--text-dim);margin-bottom:24px;line-height:1.6;}
+.rules-grid{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+.rule-item{display:flex;gap:13px;padding:14px;background:rgba(48,71,94,0.1);border:1px solid rgba(48,71,94,0.25);border-radius:13px;transition:all 0.2s;}
+.rule-item:hover{border-color:rgba(240,84,84,0.2);background:rgba(240,84,84,0.04);}
+.rule-num{font-family:'DM Mono',monospace;font-size:1rem;font-weight:700;color:var(--red);width:24px;flex-shrink:0;padding-top:1px;}
+.rule-body{}
+.rule-title{font-size:0.88rem;font-weight:700;color:var(--cream);margin-bottom:3px;}
+.rule-desc{font-size:0.78rem;color:var(--text-dim);line-height:1.55;}
+.rules-warning{background:rgba(240,84,84,0.07);border:1px solid rgba(240,84,84,0.22);border-radius:12px;padding:14px;margin-bottom:20px;}
+.rw-title{font-size:0.84rem;font-weight:700;color:var(--red);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.rw-desc{font-size:0.78rem;color:rgba(245,245,245,0.55);line-height:1.55;}
+.agree-btn{width:100%;padding:13px;background:var(--red);border:none;border-radius:13px;color:white;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.25s;box-shadow:0 4px 20px rgba(240,84,84,0.3);}
+.agree-btn:hover{background:#d94444;transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,84,84,0.4);}
+
+/* ── POST DETAIL MODAL ── */
+.post-modal{max-width:640px;}
+.pm-post-body{font-size:0.88rem;color:rgba(245,245,245,0.72);line-height:1.75;margin-bottom:16px;}
+.pm-divider{height:1px;background:rgba(48,71,94,0.25);margin:16px 0;}
+.pm-comments-title{font-size:0.82rem;font-weight:600;color:var(--text-dim);font-family:'DM Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;}
+.comment{display:flex;gap:10px;margin-bottom:10px;}
+.c-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;}
+.c-bubble{background:rgba(48,71,94,0.12);border:1px solid rgba(48,71,94,0.2);border-radius:10px;padding:9px 12px;flex:1;}
+.c-meta{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.c-author{font-size:0.78rem;font-weight:700;color:var(--cream);}
+.c-time{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text-muted);}
+.c-text{font-size:0.81rem;color:rgba(245,245,245,0.62);line-height:1.6;}
+
+/* ── NEW POST MODAL ── */
+.new-post-modal{max-width:560px;}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:48px 24px;}
+.empty-em{font-size:3.5rem;margin-bottom:12px;display:block;animation:ef 4s ease-in-out infinite;}
+@keyframes ef{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.empty-t{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--text-dim);margin-bottom:6px;}
+.empty-s{font-size:0.82rem;color:var(--text-muted);}
+
+/* TOAST */
+.toast-stack{position:fixed;bottom:28px;right:28px;z-index:4000;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{background:rgba(18,18,18,0.98);border:1px solid rgba(48,71,94,0.4);border-radius:12px;padding:11px 15px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 30px rgba(0,0,0,0.5);min-width:230px;pointer-events:all;animation:tin 0.35s ease,tout 0.35s ease 2.6s both;}
+@keyframes tin{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+@keyframes tout{to{opacity:0;transform:translateX(20px);}}
+.toast-i{font-size:1.1rem;}
+.toast-m{font-size:0.8rem;color:var(--cream);}
+
+/* tab sections */
+.tab-section{display:none;}
+.tab-section.active{display:block;}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <!-- HAMBURGER TOGGLE -->
+    <div class="sb-toggle" id="sbToggle" onclick="toggleSidebar()" title="Toggle Menu">
+      <div class="sb-toggle-icon">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="sb-toggle-notif"></div>
+    </div>
+    <div class="logo" onclick="toast('🏠','Going to dashboard...')">
+      <div class="logo-dot"></div>StudyVerse
+    </div>
+  </div>
+  <div class="nav-crumbs">
+    <span class="nc">Dashboard</span><span class="nc-sep">›</span>
+    <span class="nc">Community</span><span class="nc-sep">›</span>
+    <span class="nc-act">Class XI · JEE 2026</span>
+  </div>
+  <div class="nav-right">
+    <div class="online-pill"><div class="online-dot"></div>142 Online</div>
+    <div class="profile-pill" id="profPill" onclick="toggleProfile()">
+      <div class="avatar">A</div>
+      <div>
+        <div class="pname">Arjun Sharma</div>
+        <div class="psub">Rank #47 · 18-day streak 🔥</div>
+      </div>
+    </div>
+    <div style="position:relative">
+      <div class="profile-pill" onclick="openRules()" style="padding:6px 16px;gap:6px;background:rgba(240,84,84,0.1);border-color:rgba(240,84,84,0.3);">
+        <span style="font-size:0.8rem">📜</span>
+        <span style="font-size:0.78rem;font-weight:600;color:var(--red)">Rules</span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- SIDEBAR BACKDROP -->
+<div class="sb-backdrop" id="sbBackdrop" onclick="closeSidebar()"></div>
+
+<!-- ── SIDEBAR ── -->
+<div class="sidebar" id="sidebar">
+
+  <!-- sidebar header -->
+  <div class="sb-header">
+    <div class="sb-header-logo"><div class="sb-header-dot"></div>Navigation</div>
+    <div class="sb-close" onclick="closeSidebar()" title="Close">✕</div>
+  </div>
+  <div style="padding:0 0 4px">
+    <div class="sb-label">Main</div>
+    <div class="sb-item" onclick="sbNav(this);toast('🏠','Going home...')"><span class="sb-icon">🏠</span>Dashboard</div>
+    <div class="sb-item" onclick="sbNav(this)"><span class="sb-icon">📚</span>My Subjects</div>
+    <div class="sb-item active" onclick="sbNav(this)"><span class="sb-icon">💬</span>Community<span class="sb-badge">12</span></div>
+    <div class="sb-item" onclick="sbNav(this);toast('🔔','Opening notifications...')"><span class="sb-icon">🔔</span>Notifications<span class="sb-badge-green">3</span></div>
+  </div>
+  <div class="sb-divider"></div>
+  <div>
+    <div class="sb-label">Channels</div>
+    <div class="sb-item" onclick="sbNav(this);switchTab('discussions')"><span class="sb-icon">💭</span># general</div>
+    <div class="sb-item" onclick="sbNav(this);switchTab('discussions')"><span class="sb-icon">🎯</span># jee-strategy<span class="sb-badge">5</span></div>
+    <div class="sb-item" onclick="sbNav(this);switchTab('discussions')"><span class="sb-icon">🧪</span># neet-prep</div>
+    <div class="sb-item" onclick="sbNav(this);switchTab('doubts')"><span class="sb-icon">❓</span># doubts<span class="sb-badge">8</span></div>
+    <div class="sb-item" onclick="sbNav(this);switchTab('discussions')"><span class="sb-icon">📅</span># timetables</div>
+    <div class="sb-item" onclick="sbNav(this);switchTab('discussions')"><span class="sb-icon">🏆</span># toppers-talk</div>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-members">
+    <div class="sb-members-title">Online Now</div>
+    <div class="member-row" onclick="toast('👤','Viewing Priya\'s profile...')">
+      <div class="member-av" style="background:linear-gradient(135deg,#f05454,#30475e)">P</div>
+      <span class="member-name">Priya Nair</span>
+      <span class="member-status">Studying</span>
+    </div>
+    <div class="member-row" onclick="toast('👤','Viewing Rohan\'s profile...')">
+      <div class="member-av away" style="background:linear-gradient(135deg,#30475e,#4ade80)">R</div>
+      <span class="member-name">Rohan Gupta</span>
+      <span class="member-status">Away</span>
+    </div>
+    <div class="member-row" onclick="toast('👤','Viewing Sneha\'s profile...')">
+      <div class="member-av" style="background:linear-gradient(135deg,#c084fc,#f05454)">S</div>
+      <span class="member-name">Sneha Patel</span>
+      <span class="member-status">Active</span>
+    </div>
+    <div class="member-row" onclick="toast('👤','Viewing Karan\'s profile...')">
+      <div class="member-av busy" style="background:linear-gradient(135deg,#fde047,#30475e)">K</div>
+      <span class="member-name">Karan Mehta</span>
+      <span class="member-status">In Test</span>
+    </div>
+    <div class="member-row" onclick="toast('👤','Viewing Divya\'s profile...')">
+      <div class="member-av" style="background:linear-gradient(135deg,#2dd4bf,#30475e)">D</div>
+      <span class="member-name">Divya Sharma</span>
+      <span class="member-status">Active</span>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text-muted);margin-top:8px;text-align:center;cursor:pointer;font-family:'DM Mono',monospace;" onclick="toast('👥','Viewing all 142 members...')">+137 more →</div>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- PAGE HERO -->
+  <div class="page-hero">
+    <div class="hero-row">
+      <div class="hero-left">
+        <div class="hero-eyebrow"><div class="hero-ed"></div>Live Community · Class XI · JEE 2026</div>
+        <h1 class="page-title">Where Warriors<br><em>Discuss & Conquer</em></h1>
+        <p class="page-sub">One community. One goal. Ask doubts, share strategies, and inspire each other on the path to your dream rank.</p>
+      </div>
+      <div class="hero-stats">
+        <div class="hs"><div class="hs-v">1<span>k+</span></div><div class="hs-l">Members</div></div>
+        <div class="hs"><div class="hs-v">348</div><div class="hs-l">Discussions</div></div>
+        <div class="hs"><div class="hs-v">892</div><div class="hs-l">Doubts Solved</div></div>
+        <div class="hs"><div class="hs-v">142</div><div class="hs-l">Online Now</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <div class="tab-item active" id="tab-discussions" onclick="switchTab('discussions')">💭 Discussions <span class="tab-count">348</span></div>
+    <div class="tab-item" id="tab-doubts" onclick="switchTab('doubts')">❓ Doubt Box <span class="tab-count" id="doubt-count">24</span></div>
+    <div class="tab-item" id="tab-studyrooms" onclick="switchTab('studyrooms')">🏫 Study Rooms <span class="tab-count">6</span></div>
+    <div class="tab-item" id="tab-leaderboard" onclick="switchTab('leaderboard')">🏆 Leaderboard</div>
+  </div>
+
+  <!-- ════════════════ CONTENT ════════════════ -->
+
+  <!-- DISCUSSIONS TAB -->
+  <div class="tab-section active" id="section-discussions">
+    <div class="content">
+      <div class="feed">
+
+        <!-- COMPOSER -->
+        <div class="composer">
+          <div class="composer-top">
+            <div class="comp-av">A</div>
+            <div class="comp-box">
+              <textarea class="comp-input" id="postInput" placeholder="Share your strategy, experience, or anything with the community..." rows="2"></textarea>
+            </div>
+          </div>
+          <div class="comp-footer">
+            <div class="comp-tags">
+              <span class="comp-tag" onclick="toggleTag(this,'Strategy')">Strategy</span>
+              <span class="comp-tag" onclick="toggleTag(this,'Motivation')">Motivation</span>
+              <span class="comp-tag" onclick="toggleTag(this,'Timetable')">Timetable</span>
+              <span class="comp-tag" onclick="toggleTag(this,'Resource')">Resource</span>
+              <span class="comp-tag" onclick="toggleTag(this,'JEE')">JEE</span>
+              <span class="comp-tag" onclick="toggleTag(this,'NEET')">NEET</span>
+            </div>
+            <div class="comp-actions">
+              <button class="comp-tool" title="Attach image" onclick="toast('📎','Image upload coming soon!')">📎</button>
+              <button class="comp-tool" title="Add poll" onclick="toast('📊','Poll feature coming soon!')">📊</button>
+              <button class="post-btn" onclick="submitPost()">Post →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- FEED FILTERS -->
+        <div class="feed-filters">
+          <span class="ff act" onclick="filterFeed('all',this)">All</span>
+          <span class="ff" onclick="filterFeed('strategy',this)">Strategy</span>
+          <span class="ff" onclick="filterFeed('motivation',this)">Motivation</span>
+          <span class="ff" onclick="filterFeed('timetable',this)">Timetable</span>
+          <span class="ff" onclick="filterFeed('resource',this)">Resources</span>
+          <div class="ff-divider"></div>
+          <span class="ff" onclick="filterFeed('jee',this)">JEE</span>
+          <span class="ff" onclick="filterFeed('neet',this)">NEET</span>
+        </div>
+
+        <!-- POSTS FEED -->
+        <div id="posts-feed"></div>
+
+      </div>
+
+      <!-- RIGHT SIDEBAR -->
+      <div class="sidebar-right">
+
+        <!-- TRENDING TOPICS -->
+        <div class="widget">
+          <div class="widget-title">Trending Topics</div>
+          <div class="trend-item" onclick="toast('🔥','Filtering by #JEEStrategy...')"><span class="trend-num">1</span><span class="trend-tag">#JEEStrategy</span><span class="trend-count">84 posts</span></div>
+          <div class="trend-item" onclick="toast('🔥','Filtering by #RevisionTips...')"><span class="trend-num">2</span><span class="trend-tag">#RevisionTips</span><span class="trend-count">61 posts</span></div>
+          <div class="trend-item" onclick="toast('🔥','Filtering by #Motivation...')"><span class="trend-num">3</span><span class="trend-tag">#Motivation</span><span class="trend-count">55 posts</span></div>
+          <div class="trend-item" onclick="toast('🔥','Filtering by #Timetable2026...')"><span class="trend-num">4</span><span class="trend-tag">#Timetable2026</span><span class="trend-count">43 posts</span></div>
+          <div class="trend-item" onclick="toast('🔥','Filtering by #PhysicsHelp...')"><span class="trend-num">5</span><span class="trend-tag">#PhysicsHelp</span><span class="trend-count">38 posts</span></div>
+        </div>
+
+        <!-- WEEKLY POLL -->
+        <div class="widget">
+          <div class="widget-title">Weekly Poll</div>
+          <div class="poll-q">How many hours do you study per day?</div>
+          <div class="poll-opt" onclick="votePoll(this,0)"><div class="poll-opt-label"><span>Less than 4h</span><span>12%</span></div><div class="poll-bar-wrap"><div class="poll-bar-fill" style="width:12%;background:rgba(147,197,253,0.5)"></div></div></div>
+          <div class="poll-opt" onclick="votePoll(this,1)"><div class="poll-opt-label"><span>4–6 hours</span><span>28%</span></div><div class="poll-bar-wrap"><div class="poll-bar-fill" style="width:28%;background:rgba(74,222,128,0.5)"></div></div></div>
+          <div class="poll-opt" onclick="votePoll(this,2)"><div class="poll-opt-label"><span>6–8 hours</span><span>38%</span></div><div class="poll-bar-wrap"><div class="poll-bar-fill" style="width:38%;background:rgba(240,84,84,0.6)"></div></div></div>
+          <div class="poll-opt" onclick="votePoll(this,3)"><div class="poll-opt-label"><span>8–10 hours</span><span>16%</span></div><div class="poll-bar-wrap"><div class="poll-bar-fill" style="width:16%;background:rgba(192,132,252,0.5)"></div></div></div>
+          <div class="poll-opt" onclick="votePoll(this,4)"><div class="poll-opt-label"><span>10+ hours</span><span>6%</span></div><div class="poll-bar-wrap"><div class="poll-bar-fill" style="width:6%;background:rgba(253,224,71,0.5)"></div></div></div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.64rem;color:var(--text-muted);margin-top:10px;text-align:center;">284 votes · 2 days left</div>
+        </div>
+
+        <!-- ACTIVE STUDY ROOMS -->
+        <div class="widget">
+          <div class="widget-title">Active Study Rooms</div>
+          <div class="room-item">
+            <div class="room-icon">⚡</div>
+            <div class="room-info"><div class="room-name">Physics Blitz</div><div class="room-meta">5 members · Mechanics</div></div>
+            <div class="room-join" onclick="toast('🏫','Joining Physics Blitz...')">Join</div>
+          </div>
+          <div class="room-item">
+            <div class="room-icon">🧪</div>
+            <div class="room-info"><div class="room-name">Chem Organic</div><div class="room-meta">3 members · Reactions</div></div>
+            <div class="room-join" onclick="toast('🏫','Joining Chem Organic...')">Join</div>
+          </div>
+          <div class="room-item">
+            <div class="room-icon">📐</div>
+            <div class="room-info"><div class="room-name">Math Mock</div><div class="room-meta">7 members · Calculus</div></div>
+            <div class="room-join" onclick="toast('🏫','Joining Math Mock...')">Join</div>
+          </div>
+          <div style="margin-top:10px;width:100%;">
+            <button style="width:100%;padding:8px;background:rgba(48,71,94,0.2);border:1px dashed rgba(48,71,94,0.4);border-radius:9px;color:var(--text-dim);font-family:'DM Mono',monospace;font-size:0.7rem;cursor:pointer;transition:all 0.2s;letter-spacing:0.08em;" onclick="toast('🏫','Creating new study room...')">+ Create Room</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- DOUBTS TAB -->
+  <div class="tab-section" id="section-doubts">
+    <div class="content">
+      <div class="feed">
+
+        <!-- DOUBT COMPOSER -->
+        <div class="doubt-composer">
+          <div class="panel-title" style="margin-bottom:14px;">Post a Doubt</div>
+          <div class="dc-form">
+            <input class="finp" type="text" id="doubtTitle" placeholder="Your doubt in one clear sentence — e.g. Why does friction do negative work here?">
+            <textarea class="finp ftextarea" id="doubtDesc" placeholder="Describe your doubt in detail. Mention chapter, concept, where you're stuck..."></textarea>
+            <div class="dc-row">
+              <select class="finp fsel" id="doubtSubj">
+                <option value="">Select Subject</option>
+                <option value="phy">Physics</option>
+                <option value="chem">Chemistry</option>
+                <option value="math">Mathematics</option>
+                <option value="bio">Biology</option>
+                <option value="cs">Computer Science</option>
+              </select>
+              <select class="finp fsel" id="doubtChapter">
+                <option value="">Chapter / Topic</option>
+                <option value="mechanics">Mechanics</option>
+                <option value="waves">Waves & Oscillations</option>
+                <option value="thermo">Thermodynamics</option>
+                <option value="electro">Electrostatics</option>
+                <option value="optics">Optics</option>
+                <option value="organic">Organic Chemistry</option>
+                <option value="calculus">Calculus</option>
+                <option value="algebra">Algebra</option>
+              </select>
+            </div>
+            <div class="dc-form-footer">
+              <span class="upload-hint">📎 <span style="cursor:pointer" onclick="toast('📎','Image upload coming soon!')">Attach image / diagram</span></span>
+              <button class="submit-doubt" onclick="submitDoubt()">Post Doubt →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DOUBT FILTERS -->
+        <div class="feed-filters">
+          <span class="ff act" onclick="filterDoubts('all',this)">All Doubts</span>
+          <span class="ff" onclick="filterDoubts('unsolved',this)">⏳ Unsolved</span>
+          <span class="ff" onclick="filterDoubts('solved',this)">✅ Solved</span>
+          <div class="ff-divider"></div>
+          <span class="ff" onclick="filterDoubts('phy',this)">Physics</span>
+          <span class="ff" onclick="filterDoubts('chem',this)">Chemistry</span>
+          <span class="ff" onclick="filterDoubts('math',this)">Maths</span>
+          <span class="ff" onclick="filterDoubts('bio',this)">Biology</span>
+        </div>
+
+        <div id="doubts-feed"></div>
+      </div>
+
+      <div class="sidebar-right">
+        <!-- LEADERBOARD (helpers) -->
+        <div class="widget">
+          <div class="widget-title">Top Doubt Solvers</div>
+          <div id="helper-lb"></div>
+        </div>
+
+        <!-- DOUBT STATS -->
+        <div class="widget">
+          <div class="widget-title">Community Stats</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(48,71,94,0.15);">
+              <span style="font-size:0.8rem;color:rgba(245,245,245,0.55);">Total Doubts Posted</span>
+              <span style="font-family:'DM Mono',monospace;font-size:0.84rem;color:var(--cream);">916</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(48,71,94,0.15);">
+              <span style="font-size:0.8rem;color:rgba(245,245,245,0.55);">Doubts Solved Today</span>
+              <span style="font-family:'DM Mono',monospace;font-size:0.84rem;color:#4ade80;">+24</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(48,71,94,0.15);">
+              <span style="font-size:0.8rem;color:rgba(245,245,245,0.55);">Avg Response Time</span>
+              <span style="font-family:'DM Mono',monospace;font-size:0.84rem;color:var(--red);">~12 min</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+              <span style="font-size:0.8rem;color:rgba(245,245,245,0.55);">Solution Rate</span>
+              <span style="font-family:'DM Mono',monospace;font-size:0.84rem;color:var(--cream);">97.2%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBJECT BREAKDOWN -->
+        <div class="widget">
+          <div class="widget-title">Doubts by Subject</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div><div style="display:flex;justify-content:space-between;font-size:0.76rem;color:rgba(245,245,245,0.55);margin-bottom:4px;"><span>Physics</span><span>38%</span></div><div style="height:5px;background:rgba(245,245,245,0.06);border-radius:5px;overflow:hidden;"><div style="width:38%;height:100%;background:rgba(147,197,253,0.6);border-radius:5px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:0.76rem;color:rgba(245,245,245,0.55);margin-bottom:4px;"><span>Mathematics</span><span>32%</span></div><div style="height:5px;background:rgba(245,245,245,0.06);border-radius:5px;overflow:hidden;"><div style="width:32%;height:100%;background:rgba(240,84,84,0.6);border-radius:5px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:0.76rem;color:rgba(245,245,245,0.55);margin-bottom:4px;"><span>Chemistry</span><span>22%</span></div><div style="height:5px;background:rgba(245,245,245,0.06);border-radius:5px;overflow:hidden;"><div style="width:22%;height:100%;background:rgba(74,222,128,0.6);border-radius:5px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:0.76rem;color:rgba(245,245,245,0.55);margin-bottom:4px;"><span>Biology</span><span>8%</span></div><div style="height:5px;background:rgba(245,245,245,0.06);border-radius:5px;overflow:hidden;"><div style="width:8%;height:100%;background:rgba(45,212,191,0.6);border-radius:5px;"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDY ROOMS TAB -->
+  <div class="tab-section" id="section-studyrooms">
+    <div class="content">
+      <div class="feed">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding-bottom:40px;">
+          <div id="rooms-grid"></div>
+        </div>
+        <div id="rooms-list"></div>
+      </div>
+      <div class="sidebar-right">
+        <div class="widget">
+          <div class="widget-title">Create a Room</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <input class="finp" placeholder="Room name..." id="roomName">
+            <select class="finp fsel" id="roomSubject">
+              <option value="">Choose subject</option>
+              <option>Physics</option><option>Chemistry</option>
+              <option>Mathematics</option><option>Biology</option><option>Mixed</option>
+            </select>
+            <select class="finp fsel">
+              <option>Open to all</option>
+              <option>Invite only</option>
+              <option>Class only</option>
+            </select>
+            <button class="submit-doubt" onclick="createRoom()" style="width:100%">Create Room →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD TAB -->
+  <div class="tab-section" id="section-leaderboard">
+    <div class="content" style="grid-template-columns:1fr;">
+      <div id="full-lb"></div>
+    </div>
+  </div>
+
+</div><!-- end .main -->
+
+<!-- ── COMMUNITY RULES MODAL ── -->
+<div class="overlay" id="rulesModal" onclick="closeRules(event)">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">📜 Community Rules</div>
+      <button class="modal-x" onclick="document.getElementById('rulesModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-sub">StudyVerse is a space built on respect, curiosity, and growth. To keep it safe and productive for everyone — especially during high-pressure exam season — please follow these rules.</div>
+    <div class="rules-grid">
+      <div class="rule-item"><div class="rule-num">01</div><div class="rule-body"><div class="rule-title">Be Respectful Always</div><div class="rule-desc">Treat every member with kindness. No bullying, mocking wrong answers, or belittling anyone's rank or score. We were all beginners once.</div></div></div>
+      <div class="rule-item"><div class="rule-num">02</div><div class="rule-body"><div class="rule-title">No Spam or Promotion</div><div class="rule-desc">Don't post repetitive messages, advertisements, referral codes, or external coaching promotional content. Genuine resource sharing is welcome.</div></div></div>
+      <div class="rule-item"><div class="rule-num">03</div><div class="rule-body"><div class="rule-title">Post in Correct Channels</div><div class="rule-desc">Use #doubts for academic questions, #jee-strategy for exam planning, #general for casual chat. Off-topic posts will be moved.</div></div></div>
+      <div class="rule-item"><div class="rule-num">04</div><div class="rule-body"><div class="rule-title">No Sharing Exam Cheats</div><div class="rule-desc">Sharing exam paper leaks, unauthorised answer keys, or any content that facilitates cheating is strictly prohibited and will lead to an immediate ban.</div></div></div>
+      <div class="rule-item"><div class="rule-num">05</div><div class="rule-body"><div class="rule-title">Cite Your Sources</div><div class="rule-desc">When sharing notes, solutions, or strategies from other creators, credit them. Academic integrity is the foundation of real learning.</div></div></div>
+      <div class="rule-item"><div class="rule-num">06</div><div class="rule-body"><div class="rule-title">Mental Health First</div><div class="rule-desc">If someone is stressed or struggling, support them. Do not compare scores or rank others publicly. Encourage, don't discourage.</div></div></div>
+      <div class="rule-item"><div class="rule-num">07</div><div class="rule-body"><div class="rule-title">Keep It Academic</div><div class="rule-desc">This is a study-focused space. Political debates, religious discussions, and off-topic controversial content are not permitted.</div></div></div>
+      <div class="rule-item"><div class="rule-num">08</div><div class="rule-body"><div class="rule-title">Mark Doubts as Solved</div><div class="rule-desc">When your doubt is answered, mark it as solved so others can find clean, resolved threads. It helps the entire community.</div></div></div>
+    </div>
+    <div class="rules-warning">
+      <div class="rw-title">⚠️ Violations</div>
+      <div class="rw-desc">Breaking these rules may result in warnings, temporary muting, or permanent removal from the community. Moderators have the final say. Be the kind of student you'd want studying beside you.</div>
+    </div>
+    <button class="agree-btn" onclick="agreeRules()">✓ I Understand — Enter Community</button>
+  </div>
+</div>
+
+<!-- POST DETAIL MODAL -->
+<div class="overlay" id="postModal" onclick="closePostModal(event)">
+  <div class="modal post-modal">
+    <div class="modal-hd">
+      <div class="modal-title" id="pm-title">Discussion</div>
+      <button class="modal-x" onclick="document.getElementById('postModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="pm-post-body" id="pm-body"></div>
+    <div class="pm-divider"></div>
+    <div class="pm-comments-title" id="pm-cc">3 Comments</div>
+    <div id="pm-comments"></div>
+    <div class="reply-input-wrap" style="margin-top:12px;">
+      <div class="reply-av">A</div>
+      <input class="reply-input" id="pm-reply-input" placeholder="Add a comment...">
+      <button class="reply-send" onclick="addComment()">↑</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toasts"></div>
+
+<script>
+// ── DATA ──
+const avatarColors = [
+  'linear-gradient(135deg,#f05454,#30475e)',
+  'linear-gradient(135deg,#30475e,#4ade80)',
+  'linear-gradient(135deg,#c084fc,#f05454)',
+  'linear-gradient(135deg,#fde047,#30475e)',
+  'linear-gradient(135deg,#2dd4bf,#30475e)',
+  'linear-gradient(135deg,#f59e0b,#f05454)',
+  'linear-gradient(135deg,#4ade80,#30475e)',
+];
+const names = ['Priya Nair','Rohan Gupta','Sneha Patel','Karan Mehta','Divya Sharma','Aryan Joshi','Meera Singh','Raj Kumar','Ananya Roy','Vikram Das'];
+const initials = n => n.split(' ').map(x=>x[0]).join('');
+
+let postsData = [
+  {id:1,author:'Priya Nair',rank:'topper',time:'2h ago',category:'strategy',cat:'cat-strategy',body:`<strong>My 6-month JEE preparation strategy that took me from rank 8000 → 1200 🚀</strong>\n\nI was at rank 8000 in my first mock test in September. Here's exactly what I changed:\n\n1. Stopped trying to cover everything — focused only on high-weightage chapters.\n2. Did <strong>3 revisions</strong> of every chapter before moving on. First study, first revision, full mock test.\n3. Solved previous year papers from 2015-2024 before attempting any coaching material.\n4. Fixed my sleep to 10pm–6am. This was game-changing for retention.\n\nThe biggest lesson: <strong>consistency over intensity</strong>. 6 focused hours beat 12 scattered ones every time.`,tags:['#JEEStrategy','#PhysicsPrep','#TimeManagement'],likes:184,comments:42,views:1240,pinned:true,saved:false,liked:false},
+  {id:2,author:'Rohan Gupta',rank:'expert',time:'4h ago',category:'motivation',cat:'cat-motivation',body:`"<strong>Failed my first JEE attempt. Here's what I learned in those 12 months.</strong>"\n\nDropping a year is terrifying. The looks from relatives, the self-doubt at 2am, the comparison with friends who cracked it — it's brutal. But I want anyone here considering a drop year to know:\n\n<strong>The comeback is always greater than the setback.</strong>\n\nFocus on your process, not their results. Build systems, not goals. And on your worst days — remember why you started. That dream is still valid.`,tags:['#Motivation','#DroppedYear','#Comeback'],likes:312,comments:67,views:2180,pinned:false,saved:false,liked:false},
+  {id:3,author:'Sneha Patel',rank:'helper',time:'6h ago',category:'timetable',cat:'cat-timetable',body:`<strong>Sharing my daily timetable for anyone who wants a template 📅</strong>\n\n5:30am — Wake up, 15min meditation\n6:00–8:30am — Physics (hardest subject, best brain time)\n9:00–11:30am — Chemistry (theory then numericals)\n12–1pm — Lunch + short walk\n2–4:30pm — Mathematics (problem solving)\n5–6pm — Revision of the day's material\n7–9pm — Mock test or previous year papers\n10pm — Sleep (non-negotiable)\n\nI've been following this for 3 months. My consistency score is at 88%. Happy to answer any Qs!`,tags:['#Timetable','#StudySchedule','#JEE2026'],likes:256,comments:38,views:1840,pinned:false,saved:false,liked:false},
+  {id:4,author:'Karan Mehta',rank:'member',time:'8h ago',category:'resource',cat:'cat-resource',body:`<strong>Free resources I used — completely free, no paid coaching needed</strong>\n\n📹 Physics: HC Verma solutions on YouTube (channel: Physics Wallah)\n📹 Chemistry: NCERT + MS Chouhan for organic\n📐 Maths: RD Sharma for basics → Arihant for JEE level\n🎯 Mock Tests: NTA official website — free full-length mocks every 15 days\n📄 Notes: StudyVerse + Toppr notes for quick revision\n\nYou don't need ₹1.5 lakh coaching. You need discipline and the right resources.`,tags:['#FreeResources','#NCERT','#JEE'],likes:428,comments:91,views:3400,pinned:false,saved:false,liked:false},
+  {id:5,author:'Divya Sharma',rank:'expert',time:'12h ago',category:'strategy',cat:'cat-jee',body:`<strong>Why I stopped comparing my progress to others — and how my rank jumped 3000 spots</strong>\n\nComparison is the thief of progress. Every time I looked at Rohan's scores or Priya's revision count, I either got demotivated or complacent. Neither helped.\n\nSo I went on a "comparison detox" for 30 days. No peeking at leaderboards. No asking friends their scores. Just: <em>Am I better than yesterday-me?</em>\n\nResult: +3000 rank improvement, +12% avg score, and I actually enjoyed studying again.`,tags:['#MentalHealth','#JEEStrategy','#Mindset'],likes:201,comments:29,views:1560,pinned:false,saved:false,liked:false},
+];
+
+let doubtsData = [
+  {id:1,author:'Aryan Joshi',time:'1h ago',subj:'phy',subjClass:'subj-phy',subjLabel:'Physics',chapter:'Mechanics',q:'Why does friction act backwards on the rear wheel of a bicycle but forward on the front wheel?',desc:'I understand friction opposes relative motion but when I draw the FBD for a bicycle accelerating forward, I\'m confused about the direction of friction on each wheel. My textbook says rear wheel gets backward friction and front gets forward — but intuitively both should push back?',solved:false,urgent:true,answers:[],upvotes:14,},
+  {id:2,author:'Meera Singh',time:'3h ago',subj:'chem',subjClass:'subj-chem',subjLabel:'Chemistry',chapter:'Organic',q:'In SN2 reactions, why does the nucleophile attack from the back? What determines "back" here?',desc:`The mechanism shows a back-attack but I don't understand the geometry. Is it about the LUMO/HOMO interaction? Or steric hindrance? My teacher said it's because of orbital overlap but didn't explain which orbitals.`,solved:true,urgent:false,answers:[{author:'Priya Nair',rank:'topper',time:'2h ago',text:`Great question! The nucleophile attacks the σ* antibonding orbital of the C-X bond — this orbital is oriented directly opposite to the leaving group (X). The HOMO of the nucleophile overlaps with this LUMO for maximum stabilisation. The "back" attack is literally attacking from the lobe of the σ* that's 180° from the leaving group. Draw the MO diagram and it clicks immediately!`,best:true,upvotes:28},{author:'Rohan Gupta',rank:'expert',time:'1.5h ago',text:`To add to Priya's explanation — this is why SN2 doesn't work with tertiary carbons. The three bulky groups physically block access to the back lobe of the σ* orbital. The steric hindrance is a direct consequence of this geometric requirement.`,best:false,upvotes:12}]},
+  {id:3,author:'Raj Kumar',time:'5h ago',subj:'math',subjClass:'subj-math',subjLabel:'Maths',chapter:'Calculus',q:'How do I find the range of f(x) = (x²+2x+4)/(x²-2x+4) without graphing?',desc:'I know how to graph it and visually find the range but the exam won\'t give me time for that. Is there a systematic algebraic approach using the discriminant method that works for all rational functions?',solved:false,urgent:false,answers:[{author:'Sneha Patel',rank:'helper',time:'4h ago',text:`Yes! The discriminant method: Let y = (x²+2x+4)/(x²-2x+4). Cross-multiply to get y(x²-2x+4) = x²+2x+4. Rearrange: (y-1)x² + (-2y-2)x + (4y-4) = 0. For x to be real, discriminant ≥ 0: (-2y-2)² - 4(y-1)(4y-4) ≥ 0. Simplify → you'll get 1/3 ≤ y ≤ 3. So range is [1/3, 3]!`,best:false,upvotes:19}]},
+  {id:4,author:'Ananya Roy',time:'8h ago',subj:'phy',subjClass:'subj-phy',subjLabel:'Physics',chapter:'Thermodynamics',q:'What is the physical meaning of dU = 0 in an isothermal process for an ideal gas?',desc:'I know the formula but my teacher asked "what physically happens to the energy?" I said temperature stays constant but she said that\'s incomplete. What am I missing about the molecular interpretation?',solved:true,urgent:false,answers:[{author:'Karan Mehta',rank:'expert',time:'7h ago',text:`The complete answer: For an ideal gas, internal energy U depends ONLY on temperature (kinetic energy of molecules). If T is constant → KE of molecules is constant → U is constant → dU = 0. But the gas can still do work! The work done BY the gas = heat absorbed FROM surroundings (Q = W). So energy flows in as heat and immediately flows out as work — the gas is a perfect "energy pass-through" at constant T. That's the physical picture.`,best:true,upvotes:31}]},
+];
+
+let currentPostFilter = 'all';
+let currentDoubtFilter = 'all';
+let activePostId = null;
+
+// ── RENDER POSTS ──
+function renderPosts(){
+  const feed = document.getElementById('posts-feed');
+  feed.innerHTML = '';
+  let data = [...postsData];
+  if(currentPostFilter !== 'all'){
+    data = data.filter(p => p.category.toLowerCase() === currentPostFilter || p.tags.some(t => t.toLowerCase().includes(currentPostFilter)));
+  }
+  data.sort((a,b) => b.pinned - a.pinned);
+  if(!data.length){
+    feed.innerHTML = `<div class="empty-state"><span class="empty-em">💭</span><div class="empty-t">No posts yet</div><div class="empty-s">Be the first to start the conversation!</div></div>`;
+    return;
+  }
+  data.forEach((p,i)=>{
+    const el = document.createElement('div');
+    el.className = 'post' + (p.pinned?' pinned':'');
+    el.style.animationDelay = (i*0.06)+'s';
+    el.innerHTML = `
+      <div class="post-header">
+        <div class="post-av" style="background:${avatarColors[names.indexOf(p.author)%avatarColors.length]}">${initials(p.author)}</div>
+        <div class="post-meta">
+          <div class="post-author">${p.author} <span class="post-rank rank-${p.rank}">${p.rank}</span></div>
+          <div class="post-time">${p.time}</div>
+        </div>
+        <span class="post-category ${p.cat}">${p.category}</span>
+      </div>
+      <div class="post-body">${p.body.replace(/\n/g,'<br>')}</div>
+      <div class="post-tags">${p.tags.map(t=>`<span class="ptag">${t}</span>`).join('')}</div>
+      <div class="post-footer">
+        <span class="post-action ${p.liked?'liked':''}" onclick="likePost(event,${p.id},this)">👍 ${p.likes}</span>
+        <span class="post-action" onclick="openPostModal(${p.id})">💬 ${p.comments}</span>
+        <span class="post-action ${p.saved?'saved':''}" onclick="savePost(event,${p.id},this)">🔖 ${p.saved?'Saved':'Save'}</span>
+        <span class="post-action" onclick="sharePost(event)">↗ Share</span>
+        <span class="pa-sep"></span>
+        <span class="post-views">👁 ${p.views}</span>
+      </div>`;
+    el.addEventListener('click', ()=>openPostModal(p.id));
+    feed.appendChild(el);
+  });
+}
+
+function likePost(e,id,el){
+  e.stopPropagation();
+  const p = postsData.find(p=>p.id===id);
+  p.liked = !p.liked;
+  p.likes += p.liked ? 1 : -1;
+  el.textContent = `👍 ${p.likes}`;
+  el.classList.toggle('liked', p.liked);
+  toast(p.liked?'👍':'',''+( p.liked?'Post liked!':'Like removed'));
+}
+
+function savePost(e,id,el){
+  e.stopPropagation();
+  const p = postsData.find(p=>p.id===id);
+  p.saved = !p.saved;
+  el.classList.toggle('saved', p.saved);
+  el.innerHTML = `🔖 ${p.saved?'Saved':'Save'}`;
+  toast(p.saved?'🔖':'',''+( p.saved?'Post saved!':'Post unsaved'));
+}
+
+function sharePost(e){ e.stopPropagation(); toast('🔗','Link copied to clipboard!'); }
+
+function openPostModal(id){
+  const p = postsData.find(p=>p.id===id);
+  document.getElementById('pm-title').textContent = p.author + '\'s post';
+  document.getElementById('pm-body').innerHTML = p.body.replace(/\n/g,'<br>');
+  document.getElementById('pm-cc').textContent = p.comments + ' Comments';
+  const cc = document.getElementById('pm-comments');
+  cc.innerHTML = '';
+  // Fake comments
+  const fakeComments = [
+    {a:'Rohan Gupta',bg:avatarColors[1],t:'This is exactly what I needed to read today. Saving this post!',time:'1h ago'},
+    {a:'Sneha Patel',bg:avatarColors[2],t:'Point 3 about previous year papers is gold. Most people skip that step.',time:'2h ago'},
+    {a:'Karan Mehta',bg:avatarColors[3],t:'Can you share more about how you handled weak chapters specifically?',time:'3h ago'},
+  ];
+  fakeComments.forEach(c=>{
+    const el = document.createElement('div');
+    el.className = 'comment';
+    el.innerHTML = `<div class="c-av" style="background:${c.bg}">${initials(c.a)}</div><div class="c-bubble"><div class="c-meta"><span class="c-author">${c.a}</span><span class="c-time">${c.time}</span></div><div class="c-text">${c.t}</div></div>`;
+    cc.appendChild(el);
+  });
+  activePostId = id;
+  document.getElementById('postModal').classList.add('open');
+}
+
+function closePostModal(e){ if(e.target===document.getElementById('postModal')) document.getElementById('postModal').classList.remove('open'); }
+
+function addComment(){
+  const inp = document.getElementById('pm-reply-input');
+  const txt = inp.value.trim();
+  if(!txt){toast('⚠️','Type a comment first!');return;}
+  const cc = document.getElementById('pm-comments');
+  const el = document.createElement('div');
+  el.className = 'comment';
+  el.innerHTML = `<div class="c-av" style="background:${avatarColors[0]}">A</div><div class="c-bubble"><div class="c-meta"><span class="c-author">Arjun Sharma</span><span class="c-time">Just now</span></div><div class="c-text">${esc(txt)}</div></div>`;
+  cc.appendChild(el);
+  inp.value = '';
+  if(activePostId){ const p=postsData.find(p=>p.id===activePostId); p.comments++; }
+  toast('✨','Comment posted!');
+}
+
+function submitPost(){
+  const txt = document.getElementById('postInput').value.trim();
+  if(!txt){toast('⚠️','Write something first!');return;}
+  const selTags = Array.from(document.querySelectorAll('.comp-tag.sel')).map(t=>t.textContent);
+  const cat = selTags[0]||'General';
+  const catMap = {Strategy:'cat-strategy',Motivation:'cat-motivation',Timetable:'cat-timetable',Resource:'cat-resource',JEE:'cat-jee',NEET:'cat-neet',General:'cat-general'};
+  postsData.unshift({id:Date.now(),author:'Arjun Sharma',rank:'member',time:'Just now',category:cat.toLowerCase(),cat:catMap[cat]||'cat-general',body:txt,tags:selTags.map(t=>'#'+t),likes:0,comments:0,views:1,pinned:false,saved:false,liked:false});
+  document.getElementById('postInput').value = '';
+  document.querySelectorAll('.comp-tag.sel').forEach(t=>t.classList.remove('sel'));
+  renderPosts();
+  toast('✨','Post shared with the community!');
+}
+
+function filterFeed(f,el){ currentPostFilter=f; document.querySelectorAll('.ff').forEach(x=>x.classList.remove('act')); el.classList.add('act'); renderPosts(); }
+function toggleTag(el,t){ el.classList.toggle('sel'); }
+
+// ── RENDER DOUBTS ──
+function renderDoubts(){
+  const feed = document.getElementById('doubts-feed');
+  feed.innerHTML = '';
+  let data = [...doubtsData];
+  if(currentDoubtFilter==='unsolved') data=data.filter(d=>!d.solved);
+  else if(currentDoubtFilter==='solved') data=data.filter(d=>d.solved);
+  else if(currentDoubtFilter!=='all') data=data.filter(d=>d.subj===currentDoubtFilter);
+  if(!data.length){
+    feed.innerHTML = `<div class="empty-state"><span class="empty-em">❓</span><div class="empty-t">No doubts here yet</div><div class="empty-s">Post the first doubt in this category!</div></div>`;
+    return;
+  }
+  data.forEach((d,i)=>{
+    const el = document.createElement('div');
+    el.className = 'doubt-card'+(d.solved?' solved':'')+(d.urgent?' urgent-d':'');
+    el.style.animationDelay = (i*0.06)+'s';
+    const answersHtml = d.answers.map(a=>`
+      <div class="answer-item ${a.best?'best':''}">
+        <div class="ans-av" style="background:${avatarColors[names.indexOf(a.author)%avatarColors.length]}">${initials(a.author)}</div>
+        <div class="ans-body">
+          <div class="ans-meta">
+            <span class="ans-author">${a.author}</span>
+            <span class="ans-time">${a.time}</span>
+            ${a.best?'<span class="best-tag">✓ Best Answer</span>':''}
+          </div>
+          <div class="ans-text">${a.text}</div>
+          <div class="ans-actions">
+            <span class="ans-btn" onclick="upvoteAns(this)">👍 ${a.upvotes}</span>
+            <span class="ans-btn" onclick="toast('💬','Reply coming soon!')">💬 Reply</span>
+          </div>
+        </div>
+      </div>`).join('');
+    el.innerHTML = `
+      <div class="dc-top">
+        <div class="dc-av" style="background:${avatarColors[names.indexOf(d.author)%avatarColors.length]}">${initials(d.author)}</div>
+        <div class="dc-meta">
+          <div class="dc-author-row">
+            <span class="dc-author">${d.author}</span>
+            <span class="dc-subj ${d.subjClass}">${d.subjLabel}</span>
+            <span class="dc-subj" style="background:rgba(48,71,94,0.2);color:rgba(245,245,245,0.4);border:1px solid rgba(48,71,94,0.3);">${d.chapter}</span>
+          </div>
+          <span class="dc-time">${d.time}</span>
+        </div>
+        ${d.solved?'<span class="solved-badge">✅ Solved</span>':''}
+      </div>
+      <div class="dc-q">${d.q}</div>
+      <div class="dc-desc">${d.desc}</div>
+      <div class="dc-footer">
+        <span class="dc-action ${d.answers.length?'answered':''}" onclick="toggleAnswers(this,'ans-${d.id}')">💬 ${d.answers.length} answer${d.answers.length!==1?'s':''} ${d.answers.length?'▾':'▸'}</span>
+        <span class="dc-action" onclick="toast('👍','Upvoted this doubt!')">👍 ${d.upvotes}</span>
+        ${!d.solved?`<span class="dc-action" onclick="markSolved(${d.id},this)">✅ Mark Solved</span>`:''}
+        <span class="dc-action" onclick="toast('🔔','You\'ll be notified when answered!')">🔔 Follow</span>
+        <span class="dc-sep"></span>
+        <span class="dc-replies">👁 ${d.upvotes*4+20} views</span>
+      </div>
+      <div class="answer-thread" id="ans-${d.id}">
+        ${answersHtml}
+        <div class="reply-input-wrap">
+          <div class="reply-av">A</div>
+          <input class="reply-input" placeholder="Write your answer..." id="reply-inp-${d.id}">
+          <button class="reply-send" onclick="postAnswer(${d.id})">↑</button>
+        </div>
+      </div>`;
+    feed.appendChild(el);
+  });
+  document.getElementById('doubt-count').textContent = doubtsData.length;
+}
+
+function toggleAnswers(btn, id){
+  const thread = document.getElementById(id);
+  thread.classList.toggle('open');
+  const open = thread.classList.contains('open');
+  const txt = btn.textContent;
+  btn.textContent = txt.replace(open?'▸':'▾', open?'▾':'▸');
+}
+
+function markSolved(id, el){
+  const d = doubtsData.find(d=>d.id===id);
+  d.solved = true;
+  renderDoubts();
+  toast('✅','Doubt marked as solved!');
+}
+
+function postAnswer(id){
+  const inp = document.getElementById('reply-inp-'+id);
+  const txt = inp.value.trim();
+  if(!txt){toast('⚠️','Write your answer first!');return;}
+  const d = doubtsData.find(d=>d.id===id);
+  d.answers.push({author:'Arjun Sharma',rank:'member',time:'Just now',text:txt,best:false,upvotes:0});
+  inp.value='';
+  renderDoubts();
+  // re-open thread
+  setTimeout(()=>{
+    const thread = document.getElementById('ans-'+id);
+    if(thread) thread.classList.add('open');
+  },100);
+  toast('✨','Answer posted! You\'re helping someone out 🌟');
+}
+
+function upvoteAns(el){
+  const parts = el.textContent.trim().split(' ');
+  const num = parseInt(parts[1]||'0')+1;
+  el.textContent = `👍 ${num}`;
+  el.classList.add('upvoted');
+  toast('👍','Upvoted!');
+}
+
+function submitDoubt(){
+  const title = document.getElementById('doubtTitle').value.trim();
+  const desc = document.getElementById('doubtDesc').value.trim();
+  const subj = document.getElementById('doubtSubj').value;
+  const chapter = document.getElementById('doubtChapter').value;
+  if(!title||!subj){toast('⚠️','Fill in the doubt title and subject!');return;}
+  const subjMap = {phy:{class:'subj-phy',label:'Physics'},chem:{class:'subj-chem',label:'Chemistry'},math:{class:'subj-math',label:'Maths'},bio:{class:'subj-bio',label:'Biology'},cs:{class:'subj-cs',label:'CS'}};
+  const s = subjMap[subj]||{class:'subj-phy',label:'Other'};
+  doubtsData.unshift({id:Date.now(),author:'Arjun Sharma',time:'Just now',subj,subjClass:s.class,subjLabel:s.label,chapter:chapter||'General',q:title,desc:desc||'No description provided.',solved:false,urgent:false,answers:[],upvotes:0});
+  document.getElementById('doubtTitle').value='';
+  document.getElementById('doubtDesc').value='';
+  document.getElementById('doubtSubj').value='';
+  document.getElementById('doubtChapter').value='';
+  renderDoubts();
+  toast('❓','Doubt posted! The community will help you soon 💪');
+}
+
+function filterDoubts(f,el){ currentDoubtFilter=f; document.querySelectorAll('#section-doubts .ff').forEach(x=>x.classList.remove('act')); el.classList.add('act'); renderDoubts(); }
+
+// ── LEADERBOARD ──
+const lbData = [
+  {name:'Priya Nair',pts:4820,rank:1,streak:32,solved:142,bg:avatarColors[0]},
+  {name:'Divya Sharma',pts:4310,rank:2,streak:28,solved:118,bg:avatarColors[4]},
+  {name:'Rohan Gupta',pts:3980,rank:3,streak:21,solved:97,bg:avatarColors[1]},
+  {name:'Sneha Patel',pts:3540,rank:4,streak:18,solved:84,bg:avatarColors[2]},
+  {name:'Aryan Joshi',pts:3120,rank:5,streak:15,solved:71,bg:avatarColors[5]},
+  {name:'Meera Singh',pts:2890,rank:6,streak:14,solved:63,bg:avatarColors[6]},
+  {name:'Karan Mehta',pts:2640,rank:7,streak:12,solved:58,bg:avatarColors[3]},
+  {name:'Raj Kumar',pts:2380,rank:8,streak:10,solved:49,bg:avatarColors[0]},
+  {name:'Ananya Roy',pts:2140,rank:9,streak:9,solved:44,bg:avatarColors[2]},
+  {name:'Arjun Sharma',pts:1980,rank:10,streak:18,solved:38,bg:avatarColors[0]},
+];
+
+function renderHelperLb(){
+  const el = document.getElementById('helper-lb');
+  if(!el) return;
+  el.innerHTML = lbData.slice(0,5).map((m,i)=>{
+    const rc = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    return `<div class="lb-row"><span class="lb-rank ${rc}">${m.rank}</span><div class="lb-av" style="background:${m.bg}">${initials(m.name)}</div><span class="lb-name">${m.name}</span><span class="lb-pts">${m.solved} solved</span></div>`;
+  }).join('');
+}
+
+function renderFullLb(){
+  const el = document.getElementById('full-lb');
+  if(!el) return;
+  el.innerHTML = `
+    <div style="padding:0 0 24px">
+      <div style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;margin-bottom:6px;color:var(--cream)">Community <span style="color:var(--red)">Leaderboard</span></div>
+      <div style="font-size:0.84rem;color:var(--text-dim);">Rankings based on XP earned from posts, solved doubts, study sessions, and consistency.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;">
+      ${lbData.map((m,i)=>{
+        const rc = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+        const isMe = m.name==='Arjun Sharma';
+        return `<div style="background:${isMe?'rgba(240,84,84,0.07)':'rgba(48,71,94,0.07)'};border:1px solid ${isMe?'rgba(240,84,84,0.3)':'rgba(48,71,94,0.24)'};border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;transition:all 0.2s;cursor:default;animation:fadeUp 0.5s ease ${i*0.05}s both;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <span style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;width:28px;color:${rc==='gold'?'#fde047':rc==='silver'?'#d1d5db':rc==='bronze'?'#f59e0b':'rgba(245,245,245,0.3)'};">#${m.rank}</span>
+          <div style="width:42px;height:42px;border-radius:50%;background:${m.bg};display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;flex-shrink:0;">${initials(m.name)}</div>
+          <div style="flex:1;">
+            <div style="font-size:0.88rem;font-weight:700;color:var(--cream);margin-bottom:2px;">${m.name} ${isMe?'<span style="font-family:DM Mono,monospace;font-size:0.6rem;background:rgba(240,84,84,0.15);color:var(--red);padding:1px 6px;border-radius:8px;border:1px solid rgba(240,84,84,0.25);">YOU</span>':''}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.66rem;color:var(--text-muted);">🔥 ${m.streak}d streak · ✅ ${m.solved} doubts solved</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--red);">${m.pts.toLocaleString()}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;">XP</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ── STUDY ROOMS ──
+const roomsData = [
+  {icon:'⚡',name:'Physics Blitz',subject:'Physics',members:5,topic:'Laws of Motion',type:'Open',host:'Priya Nair'},
+  {icon:'🧪',name:'Chem Organic',subject:'Chemistry',members:3,topic:'SN1/SN2 Mechanisms',type:'Open',host:'Rohan Gupta'},
+  {icon:'📐',name:'Math Mock',subject:'Mathematics',members:7,topic:'Calculus — Limits',type:'Open',host:'Sneha Patel'},
+  {icon:'🌡',name:'Thermo Study',subject:'Physics',members:4,topic:'Thermodynamics Laws',type:'Invite',host:'Karan Mehta'},
+  {icon:'🧬',name:'Bio NEET Prep',subject:'Biology',members:6,topic:'Cell Division',type:'Open',host:'Divya Sharma'},
+  {icon:'🔢',name:'Algebra Masters',subject:'Mathematics',members:2,topic:'Complex Numbers',type:'Open',host:'Aryan Joshi'},
+];
+
+function renderRooms(){
+  const rl = document.getElementById('rooms-list');
+  if(!rl) return;
+  rl.innerHTML = `
+    <div style="margin-bottom:24px;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;margin-bottom:6px;">Active <span style="color:var(--red)">Study Rooms</span></div>
+      <div style="font-size:0.84rem;color:var(--text-dim);">Join a room to study together in real time. Rooms auto-close after 2 hours of inactivity.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding-bottom:40px;">
+      ${roomsData.map((r,i)=>`
+        <div style="background:rgba(48,71,94,0.07);border:1px solid rgba(48,71,94,0.24);border-radius:16px;padding:20px;transition:all 0.25s;cursor:pointer;animation:fadeUp 0.5s ease ${i*0.07}s both;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='rgba(240,84,84,0.28)'" onmouseout="this.style.transform='translateY(0)';this.style.borderColor='rgba(48,71,94,0.24)'">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <div style="width:46px;height:46px;border-radius:12px;background:rgba(48,71,94,0.25);border:1px solid rgba(48,71,94,0.38);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">${r.icon}</div>
+            <div>
+              <div style="font-size:0.9rem;font-weight:700;color:var(--cream);margin-bottom:2px;">${r.name}</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:rgba(245,245,245,0.35);">${r.subject} · hosted by ${r.host}</div>
+            </div>
+            <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:0.6rem;padding:2px 7px;border-radius:8px;${r.type==='Open'?'background:rgba(74,222,128,0.1);color:#4ade80;border:1px solid rgba(74,222,128,0.25);':'background:rgba(240,84,84,0.1);color:var(--red);border:1px solid rgba(240,84,84,0.25);'}">${r.type}</div>
+          </div>
+          <div style="font-size:0.8rem;color:rgba(245,245,245,0.5);margin-bottom:14px;">Currently studying: <strong style="color:var(--cream);">${r.topic}</strong></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:-6px;">
+              ${Array.from({length:Math.min(r.members,4)}).map((_,j)=>`<div style="width:22px;height:22px;border-radius:50%;background:${avatarColors[j]};border:1.5px solid var(--ink);margin-left:${j?-6:0}px;font-size:0.55rem;display:flex;align-items:center;justify-content:center;font-weight:700;">${String.fromCharCode(65+j)}</div>`).join('')}
+              <span style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--text-muted);margin-left:6px;">${r.members} studying</span>
+            </div>
+            <button style="background:var(--red);border:none;border-radius:9px;color:white;font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.78rem;padding:7px 16px;cursor:pointer;transition:all 0.2s;" onclick="event.stopPropagation();toast('🏫','Joining ${r.name}...')" onmouseover="this.style.background='#d94444'" onmouseout="this.style.background='var(--red)'">Join Room</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function createRoom(){
+  const name = document.getElementById('roomName').value.trim();
+  const subj = document.getElementById('roomSubject').value;
+  if(!name||!subj){toast('⚠️','Enter room name and subject!');return;}
+  toast('🏫',`Room "${name}" created! Sharing link...`);
+  document.getElementById('roomName').value='';
+}
+
+// ── TABS ──
+function switchTab(tab){
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('section-'+tab).classList.add('active');
+  if(tab==='leaderboard') renderFullLb();
+  if(tab==='studyrooms') renderRooms();
+  if(window.innerWidth < 900) closeSidebar();
+}
+
+// ── SIDEBAR TOGGLE ──
+function toggleSidebar(){
+  const sb   = document.getElementById('sidebar');
+  const btn  = document.getElementById('sbToggle');
+  const bd   = document.getElementById('sbBackdrop');
+  const isOpen = sb.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  bd.classList.toggle('visible', isOpen);
+  // On wider screens push main content
+  document.querySelector('.main').style.marginLeft = isOpen ? 'var(--sidebar-w)' : '0';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbToggle').classList.remove('open');
+  document.getElementById('sbBackdrop').classList.remove('visible');
+  document.querySelector('.main').style.marginLeft = '0';
+}
+
+// ── SIDEBAR ──
+function sbNav(el){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  // Auto-close on small screens
+  if(window.innerWidth < 900) closeSidebar();
+}
+
+// ── PROFILE TOGGLE ──
+function toggleProfile(){ toast('👤','Profile menu coming soon!'); }
+
+// ── RULES ──
+function openRules(){ document.getElementById('rulesModal').classList.add('open'); }
+function closeRules(e){ if(e.target===document.getElementById('rulesModal')) document.getElementById('rulesModal').classList.remove('open'); }
+function agreeRules(){ document.getElementById('rulesModal').classList.remove('open'); toast('✅','Welcome to the community! Be kind, be helpful, be legendary! 🌟'); }
+
+// ── POLL ──
+function votePoll(el){ toast('📊','Vote recorded! Thanks for participating.'); }
+
+// ── UTILS ──
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function toast(icon,msg){
+  const el=document.createElement('div'); el.className='toast';
+  el.innerHTML=`<span class="toast-i">${icon}</span><span class="toast-m">${msg}</span>`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(),3100);
+}
+
+// ── INIT ──
+renderPosts();
+renderDoubts();
+renderHelperLb();
+
+setTimeout(()=>toast('🌸','Welcome to the Community, Arjun! 🎌'),700);
+setTimeout(()=>toast('❓','8 new doubts need your help today!'),2200);
+setTimeout(()=>toast('☰','Click the menu button (top-left) to open the sidebar!'),3600);
+setTimeout(()=>openRules(),1400);
+</script>
+</body>
+</html>
